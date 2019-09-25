@@ -2,18 +2,15 @@
 # Overview
 If an Azure VM is inaccessible it may be necessary to attach the OS disk to another Azure VM in order to perform recovery steps. The VM recovery scripts automate the recovery steps below.
 
-1. Stops the problem VM.
-2. Takes a snapshot of the problem VM's OS disk.
+1. Stops the problematic Encrypted VM.
+2. Takes a snapshot of the problematic VM's OS disk and creates a copy of disk from snapshot.
 3. Creates a new temporary VM ("rescue VM"). 
-4. Attaches the problem VM's OS disk as a data disk on the rescue VM.
+4. Attaches the copy of problematic's VM's OS disk as a data disk on the rescue VM.
 5. You can then connect to the rescue VM to investigate and mitigate issues with the problem VM's OS disk.
-6. Detaches the problem VM's OS disk from the rescue VM.
-7. Performs a disk swap to swap the problem VM's OS disk from the rescue VM back to the problem VM.
-8. Removes the resources that were created for the rescue VM.
 
 # Supported VM Types
 
-This version of the VM recovery script is for use with Azure VMs created using the Azure Resource Manager (ARM) deployment model. It supports both Linux and Windows VMs using either managed or unmanaged disks. For VMs created using the Classic deployment model, use the version located under \Classic instead of \ResourceManager.
+This version of the VM recovery script is for use with Azure VMs created using the Azure Resource Manager (ARM) deployment model. It supports only Linux VMs whose OS disk in encrypted and it should be Managed disk.
 
 ## When would you use the script?
 
@@ -33,11 +30,11 @@ The VM recovery script is most applicable when a VM is not booting, as seen on t
 
 5. Run the following command to download the scripts. Git is preinstalled in Cloud Shell. You do not need to install it separately.
    ```PowerShell
-   git clone https://github.com/Azure/azure-support-scripts $home/CloudDrive/azure-support-scripts
+   git clone https://github.com/dibaskar/encryptedvm-support-scripts $home/encryptedvm-support-scripts
    ```
 6. Switch into the folder by running:
    ```PowerShell
-   cd $home/CloudDrive/azure-support-scripts/VMRecovery/ResourceManager
+   cd $home/encryptedvm-support-scripts
    ```
 7. Run the following command to create a new "rescue VM" and attach the OS disk of the problem VM to the rescue VM as a data disk:
    ```PowerShell
