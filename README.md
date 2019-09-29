@@ -52,7 +52,7 @@ The VM recovery script is most applicable when a VM is not booting, as seen on t
    ```PowerShell
    ./new-rescue.ps1
    vmName:   ( Problematic VM's Name )
-   ResourceGroupName:  ( Problematic VM's Resource Gropu Name )
+   ResourceGroupName:  ( Problematic VM's Resource Group Name )
    Encryption_type:  ( This information can be gathered from ASC.Encryption using AAD Credentials is Dual and without AAD Credentials is single )
    rescueVMName:  ( Rescue VM's name )
    rescuevmusername:  ( Rescue VM's username )
