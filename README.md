@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 # Overview
+# Please note : This powershell script was created from https://github.com/Azure/azure-support-scripts/tree/master/VMRecovery/ResourceManager which was written by Windows PG for rescue VM creation for non encrypted VMs.Script was modified to create rescue VM for trouble encrypted VM boot issues. 
 If an Azure VM is inaccessible it may be necessary to attach the OS disk to another Azure VM in order to perform recovery steps. The VM recovery scripts automate the recovery steps below.
 
 1. Stops the problematic Encrypted VM.
