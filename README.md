@@ -1,6 +1,7 @@
 <<<<<<< HEAD
+# Please note : This powershell script was created from https://github.com/Azure/azure-support-scripts/tree/master/VMRecovery/ResourceManager which was written by Windows PG for rescue VM creation for non encrypted VMs.Script was modified to create rescue VM for troublehooting encrypted VM boot issues.This script works only on powershell which is available on Azure portal. 
+
 # Overview
-# Please note : This powershell script was created from https://github.com/Azure/azure-support-scripts/tree/master/VMRecovery/ResourceManager which was written by Windows PG for rescue VM creation for non encrypted VMs.Script was modified to create rescue VM for trouble encrypted VM boot issues. 
 If an Azure VM is inaccessible it may be necessary to attach the OS disk to another Azure VM in order to perform recovery steps. The VM recovery scripts automate the recovery steps below.
 
 1. Stops the problematic Encrypted VM.
@@ -37,19 +38,20 @@ The VM recovery script is most applicable when a VM is not booting, as seen on t
    ```PowerShell
    cd $home/encryptedvm-support-scripts
    ```
+
+
+7. If there are multiple subscriptions available then please selet your problematic VM's subscription using the below command:
+   ```PowerShell
+   Select-AzureSubscription -SubscriptionId 4xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx8a2
+   ```
+
+
+ 
+
 7. Run the following command to create a new "rescue VM" and attach the OS disk of the problem VM to the rescue VM as a data disk:
    ```PowerShell
-   ./New-AzureRMRescueVM.ps1 -ResourceGroupName <resourceGroupName> -VmName <vmName>
+   ./new-rescue.ps1
    ```
-   If you need to verify the resource group name and VM name, run **`Get-AzureRmVM`**. If you need to verify the subscription ID, run **`Get-AzureRmSubscription`**.
-   
-   If the problem VM is a Windows VM, the rescue VM is created from the Windows Server 2016 marketplace image that has the Desktop Experience installed. 
-   
-   If the problem VM is a Linux VM, the rescue VM is created from the Ubuntu 16.04 LTS marketplace image. 
-   
-   You can use the -publisher/-offer/-sku parameters when running New-AzureRMRescueVM.ps1 if you need to create the rescue VM from a different marketplace image.
-
-8. When New-AzureRMRescueVM.ps1 completes, it will create a PowerShell script, `Restore_<problemVmName>.ps1`, that you will run later to swap the problem VM's OS disk back to the problem VM.
 
 9. RDP to the rescue VM to resolve the issue with the OS disk of the problem VM.
 
