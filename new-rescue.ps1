@@ -455,7 +455,7 @@ Update-AzureRmVM -ResourceGroupName $resourceGroupName -VM $DestVM
 
 echo "###############################################"
 
-write-Host "Copy of OS disk is successfully attached to rescue VM. Please refer CSS wiki page https://www.csssupportwiki.com/index.php/curated:Azure/Virtual_Machine/Features/Disk_Encryption/TSG/General_troubleshooting_for_encrypted_managed_disk#Method_1_2"  and refer point no 9 which consists of the below commands on rescue VM to mount the OS disk"
+write-Host "Copy of OS disk is successfully attached to rescue VM. Please refer CSS wiki page https://www.csssupportwiki.com/index.php/curated:Azure/Virtual_Machine/Features/Disk_Encryption/TSG/General_troubleshooting_for_encrypted_managed_disk#Method_1_2"  and refer Troubleshooting using ADE Dual-Pass --> Method 1 point no 9 which consists of the below commands on rescue VM to mount the OS disk. Once Troubleshooting is done Please refer point no 10 and 11 for for recreating and installing the ADE extension respectively"
 
 
 
