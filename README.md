@@ -46,8 +46,6 @@ The VM recovery script is most applicable when a VM is not booting, as seen on t
    ```
 
 
- 
-
 8. Run the following command to create a new "rescue VM" and attach the OS disk of the problem VM to the rescue VM as a data disk:
    ```PowerShell
    ./new-rescue.ps1
@@ -58,6 +56,13 @@ The VM recovery script is most applicable when a VM is not booting, as seen on t
    rescuevmusername:  ( Rescue VM's username )
    rescuevmpassword:  ( Rescue VM's Password. Password length should be minimum 12 characters with special characters in it else rescue VM creation will fail )
    ```
+
+      a) If Encryption is single then ADE extension will be installed on rescue VM for making BEK volume available.
+```PowerShell^M
+Enable AzureDiskEncryption on the VM
+This cmdlet prepares the VM and enables encryption which may reboot the machine and takes 10-15 minutes to finish. Please save your work on the VM before confirming. Do you want to
+continue?
+[Y] Yes  [N] No  [S] Suspend  [?] Help (default is "Y"):   ( Please provide Y here for proceeding with the extension installation )^M
 
 9. SSH to the rescue VM to mount the attached encrypted OS disk and proceed with further troubleshooting.
 
