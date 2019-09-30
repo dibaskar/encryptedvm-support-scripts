@@ -63,6 +63,6 @@ Enable AzureDiskEncryption on the VM
 This cmdlet prepares the VM and enables encryption which may reboot the machine and takes 10-15 minutes to finish. Please save your work on the VM before confirming. Do you want to
 continue?
 [Y] Yes  [N] No  [S] Suspend  [?] Help (default is "Y"):   ( Please provide Y here for proceeding with the extension installation )^M
-
+```
 9. SSH to the rescue VM to mount the attached encrypted OS disk and proceed with further troubleshooting.
 
