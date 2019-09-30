@@ -1,3 +1,21 @@
+###########################################################################################################################
+#                                                                                                                         #
+#  Name : ADE decryption script                                                                                           #
+#                                                                                                                         #
+#  Purpose : For Troubleshooting boot issues on Linux VMs with Managed disk whose OS disk is encrypted                    #
+#                                                                                                                         #
+#  Author : Dinesh.Baskar@microsoft.com                                                                                   #
+#                                                                                                                         #
+#  Idea : techarl@microsoft.com                                                                                           #
+#                                                                                                                         #
+#  ADE expertise help : Kailash.B@microsoft.com                                                                           #
+#                                                                                                                         #
+#  Testing : Kavita.Shetty@microsoft.com                                                                                  #
+#                                                                                                                         #
+#                                                                                                                         #
+#                                                                                                                         #
+###########################################################################################################################
+
 <#
 .SYNOPSIS
     Creates a Rescue VM and attaches the OS Disk of the problem VM to this intermediate rescue VM.
@@ -91,7 +109,6 @@
 
     To get help on the below script run get-help .\New-AzureRMRescueVM.ps1
 
-    Author: Sujasd
 #>
 
 param(
