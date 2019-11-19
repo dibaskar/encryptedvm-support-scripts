@@ -35,7 +35,7 @@ This version of the VM recovery script is for use with Azure VMs created using t
    ```
 
 
-7. If there are multiple subscriptions available then please selet your problematic VM's subscription using the below command:
+7. Please execute the below commands to set the impacted VM's subscription details.**`Please note : Both these commands need to be executed in powershell to set the subcriptions as the script consists of both bash and powershell commands.`**
    ```PowerShell
    Set-AzureRmContext -SubscriptionId 4xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx8a2
    az account set --subscription 4xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx8a2
