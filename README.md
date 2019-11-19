@@ -38,6 +38,7 @@ This version of the VM recovery script is for use with Azure VMs created using t
 7. If there are multiple subscriptions available then please selet your problematic VM's subscription using the below command:
    ```PowerShell
    Set-AzureRmContext -SubscriptionId 4xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx8a2
+   az account set --subscription 4xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx8a2
    ```
 
 
