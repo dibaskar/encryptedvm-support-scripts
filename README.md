@@ -41,7 +41,6 @@ This version of the VM recovery script is for use with Azure VMs created using t
    az account set --subscription 4xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx8a2
    ```
 
-
 8. Execute the script as mentioned below create a new "rescue VM" and attach the OS disk of the problem VM to the rescue VM as data disk:
    ```PowerShell
    ./new-rescue.ps1
