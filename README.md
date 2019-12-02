@@ -54,8 +54,8 @@ This version of the VM recovery script is for use with Azure VMs created using t
    ```
 
 **`Please note : If VM is created from specialised disk then you will be prompted to enter image name manually as below`**.^M
-   ```PowerShell^M
-    ################ ######### VM seems to be created from specialised Disk.
+    ```PowerShell^M
+    ################ ######### VM seems to be created from specialised Disk.^M
     Enter image name. ( Valid Image names are RHEL,SLES,UBUNTU,CENTOS ):^M
     vmName:   ( Problematic VM's Name )^M
     ```^M
@@ -67,7 +67,7 @@ Enable AzureDiskEncryption on the VM
 This cmdlet prepares the VM and enables encryption which may reboot the machine and takes 10-15 minutes to finish. Please save your work on the VM before confirming. Do you want to
 continue?
 [Y] Yes  [N] No  [S] Suspend  [?] Help (default is "Y"):   ( Please provide Y here for proceeding with the extension installation )^M
-```
+```^M
 
 9. Commands for mounting the disk on rescue VM will be printed once script execution is done. SSH to the rescue VM for mounting the attached encrypted OS disk and proceed with further troubleshooting **`Please note : There will be slight change in these mount commands based on the OS distro`**.
 
