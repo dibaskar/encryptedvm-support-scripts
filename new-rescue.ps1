@@ -107,6 +107,10 @@ param(
         [Parameter(mandatory=$true)]
         [String]$rescueVMName,
 
+       
+        [Parameter(mandatory=$true)]
+        [String]$rescuevm_require_public_ip,
+
 
         [Parameter(mandatory=$false)]
         [String]$subscriptionId,
@@ -313,12 +317,14 @@ $os_disk=$(echo $vm_details| jq ".storageProfile.osDisk")
 $disk_uri=$(echo $os_disk | jq ".managedDisk.id")
 $disk_uri=$($disk_uri -replace '"', "")
 
-Write-Host '################## Generating Snapshot of problematic's OS Disk ####################' -ForegroundColor DarkGreen
+Write-Host '################## Generating Snapshot of problematic VM's OS Disk ####################' -ForegroundColor DarkGreen
 $time=date +%d-%m-%Y-%T
 $source_disk_name=$(echo $disk_uri | awk -F"/" '{print $NF}')
 $snapshot_name=$((echo $disk_uri | awk -F"/" '{print $NF}') -replace '_', "-")
+$snapshot_name=$((echo $snapshot_name | cut -c1-10 ))
 $snapshot_name=$((echo $snapshot_name-snap-$time) -replace ":","-")
 $target_disk_name=$((echo $disk_uri | awk -F"/" '{print $NF}') -replace '_', "-")
+$target_disk_name=$((echo $target_disk_name | cut -c1-10))
 $target_disk_name=$((echo $target_disk_name-copy-$time) -replace ":", "-")
 az snapshot create -g $resource_group $resourceGroupName -n $snapshot_name --source $source_disk_name -l $location
 
@@ -328,19 +334,64 @@ $disk_type=$(az disk list --output table | grep -i $source_disk_name | awk '{pri
 az disk create --resource-group $resourceGroupName --name $target_disk_name -l $location --sku $disk_type --source $snapshotId
 
 Write-Host '################### Creating Rescue VM ####################' -ForegroundColor DarkGreen
-az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image_urn --storage-sku Standard_LRS
-$rescuevmip=$(az vm show -d -g $resourceGroupName -n $rescueVMName --query publicIps -o tsv)
-echo $rescuevmip
 
+IF ($rescuevm_require_public_ip -eq "YES")
+{
+    IF ($Publisher -eq "null")
+    {
+    Write-Host "################ ######### VM seems to be created from specialised Disk."
+    $image = Read-Host 'Enter image name. ( Valid Image names are RHEL,SLES,UBUNTU,CENTOS )'
+     az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image --storage-sku Standard_LRS
+     }
 
+   ELSE
+   {
+   az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image_urn --storage-sku Standard_LRS
+   }
+}
 
+IF ($rescuevm_require_public_ip -eq "NO")
+{
+   IF ($Publisher -eq "null")
+    {
+    Write-Host "################ ######### VM seems to be created from specialised Disk."
+    $image = Read-Host 'Enter image name. ( Valid Image names are RHEL,SLES,UBUNTU,CENTOS )'     
+    az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image_urn --storage-sku Standard_LRS --public-ip-address '""'
+     }
+
+   ELSE
+   {
+   az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image_urn --storage-sku Standard_LRS --public-ip-address '""'
+   }
+}
+
+$rescuevmpubip=$(az vm show -d -g $resourceGroupName -n $rescueVMName --query publicIps -o tsv)
+$rescuevmprivip=$(az vm show -d -g $resourceGroupName -n $rescueVMName --query privateIps -o tsv)
 
 $disk= Get-AzureRMDisk -ResourceGroupName $ResourceGroupName -DiskName $source_disk_name
 $keyvaulturl=$disk.EncryptionSettingsCollection.EncryptionSettings.diskencryptionkey.SecretUrl
+echo $keyvaulturl
 $kekurl=$disk.EncryptionSettingsCollection.EncryptionSettings.KeyEncryptionKey.KeyUrl
 #$Encryption_type=$disk.EncryptionSettingsCollection.Enable
 
+
+$rgName=$ResourceGroupName
+$vmName=$vmName
+$vmSize=$(echo $vm_details | grep -i "vmsize" | awk -F": " '{print $2}')
+$vmc = New-AzureRmVmConfig -VMName $vmName -VMSize $vmSize
+$interface=az vm show -g $ResourceGroupName -n $vmName | grep -i "networkinterfaces/" | head -1 | awk -F"/" '{print $NF}' | awk -F"," '{print $1}'
+$networkinterface=$($interface -replace '"', "")
+$nic = Get-AzureRmNetworkInterface -Name "$networkinterface" -ResourceGroupName $rgName
+Add-AzureRmVmNetworkInterface -VM $vmc -Id $nic.Id
+$manageddiskid = Get-AzureRMDisk -ResourceGroupName $ResourceGroupName -DiskName $target_disk_name | grep -i Id | grep -i disks | awk -F": " '{print $2}'
 $KeyVaultName=echo $keyvaulturl | awk -F".vault.azure.net" '{print $1}' | awk -F"//" '{print $2}'
+$diskencryptionkeyvaultid= Get-AzureRmKeyVault -VaultName $KeyVaultName | grep -i "Resource ID" | awk -F": " '{print $2}'
+$diskencryptionkeyurl = $keyvaulturl
+$keyvaultresourceid=$diskencryptionkeyvaultid
+$keyencryptionkeyurl=$kekurl
+echo $diskencryptionkeyvaulturl
+
+
 $rgKeyName=Get-AzureRmKeyVault -VaultName $KeyVaultName | grep -i "resource group" | awk -F": " '{print $2}'
 
 $KeyVault = Get-AzureRmKeyVault -VaultName $KeyVaultName -ResourceGroupName $rgKeyName;
@@ -413,7 +464,8 @@ Write-Host "#################### Copy of OS disk is successfully attached to res
 Write-Host "################ Below are your Rescue VM details #################""
 
 RescueVM Name : $rescueVMName 
-Resche VM IP : $rescuevmip
+Rescue VM Public IP : $rescuevmpubip
+Rescue VM Private IP : $rescuevmprivip
 Username : $rescuevmusername
 Password : $rescuevmpassword" -ForegroundColor DarkGreen
 
@@ -467,9 +519,50 @@ write-Host "Copy of OS disk is successfully attached to rescue VM. Please refer 
 Write-Host "Below are your Rescue VM details""
 
 RescueVM Name : $rescueVMName
-Resche VM IP : $rescuevmip
+Rescue VM Public IP : $rescuevmpubip
+Rescue VM Private IP : $rescuevmprivip
 Username : $rescuevmusername
 Password : $rescuevmpassword" -ForegroundColor DarkGreen
+
+echo $kekurl
+
+
+IF ( !$kekurl )
+{
+Write-Host "####################### Dual pass encryption without KEK #####################"  -ForegroundColor DarkGreen
+
+Write-Host "####################### Delete the old VM and use the below parameters to recreate the VM after troubleshooting #####################  
+
+ rgName=""$rgName""
+ location="$location"
+ vmName=""$vmName""
+ vmSize="$vmSize"
+ networkinterface=""$networkinterface""
+ manageddiskid=""$manageddiskid""
+ diskencryptionkeyvaultid=""$diskencryptionkeyvaultid""
+ diskencryptionkeyvaulturl=""$diskencryptionkeyurl""
+ keyvaultresourceid=""$diskencryptionkeyvaultid""
+ keyencryptionkeyurl=""$kekurl""" -ForegroundColor Black -BackgroundColor DarkYellow
+
+}
+ELSE
+{
+Write-Host "################ Dual pass encryption with KEK #######################" -ForegroundColor DarkGreen
+
+Write-Host "####################### Delete the old VM and use the below parameters to recreate the VM after troubleshooting #####################
+
+ rgName=""$rgName""
+ location="$location"
+ vmName=""$vmName""
+ vmSize="$vmSize"
+ networkinterface=""$networkinterface""
+ manageddiskid=""$manageddiskid""
+ diskencryptionkeyvaultid=""$diskencryptionkeyvaultid""
+ diskencryptionkeyvaulturl=""$diskencryptionkeyurl""
+ keyvaultresourceid=""$diskencryptionkeyvaultid""
+ keyencryptionkeyurl=""$kekurl""" -ForegroundColor Black -BackgroundColor DarkYellow
+
+}
 
 exit
 
