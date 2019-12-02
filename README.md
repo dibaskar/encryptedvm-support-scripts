@@ -58,7 +58,6 @@ This version of the VM recovery script is for use with Azure VMs created using t
    ./new-rescue.ps1
    ################ ######### VM seems to be created from specialised Disk.
    Enter image name. ( Valid Image names are RHEL,SLES,UBUNTU,CENTOS ):
-   vmName: ( Problematic VM's Name ):
    ```
 
 
