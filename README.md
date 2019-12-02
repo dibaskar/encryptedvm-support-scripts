@@ -53,15 +53,9 @@ This version of the VM recovery script is for use with Azure VMs created using t
    rescuevmpassword:  ( Rescue VM's Password. Password length should be minimum 12 characters with special characters in it else rescue VM creation will fail )
    ```
 
-**`Please note : If VM is created from specialised disk then you will be prompted to enter image name manually as below`**.^M
-    ```PowerShell^M
-    ################ ######### VM seems to be created from specialised Disk.^M
-    Enter image name. ( Valid Image names are RHEL,SLES,UBUNTU,CENTOS ):^M
-    vmName:   ( Problematic VM's Name )^M
-    ```^M
 
 
-      a) If Encryption is single then ADE extension will be installed on rescue VM for making BEK volume available.
+      a) If Encryption is single then ADE extension will be installed on rescue VM for making BEK volume available.^M
 ```PowerShell^M
 Enable AzureDiskEncryption on the VM
 This cmdlet prepares the VM and enables encryption which may reboot the machine and takes 10-15 minutes to finish. Please save your work on the VM before confirming. Do you want to
