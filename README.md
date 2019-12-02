@@ -63,10 +63,11 @@ This version of the VM recovery script is for use with Azure VMs created using t
    **`a) If Encryption is single then ADE extension will be installed on rescue VM for making BEK volume available`**.
    ```PowerShell
       Enable AzureDiskEncryption on the VM
-      This cmdlet prepares the VM and enables encryption which may reboot the machine and takes 10-15 minutes to finish. Please save your work on the VM before confirming. Do you want to
+     This cmdlet prepares the VM and enables encryption which may reboot the machine and takes 10-15 minutes to finish. Please save your work on the VM before confirming. Do you want to
 continue?
-      [Y] Yes  [N] No  [S] Suspend  [?] Help (default is "Y")::
+   [Y] Yes  [N] No  [S] Suspend  [?] Help (default is "Y"): ( Please enter Y here )
    ```
+   
 
 9. Commands for mounting the disk on rescue VM will be printed once script execution is done. SSH to the rescue VM for mounting the attached encrypted OS disk and proceed with further troubleshooting **`Please note : There will be slight change in these mount commands based on the OS distro`**.
 
