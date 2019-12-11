@@ -356,7 +356,7 @@ IF ($rescuevm_require_public_ip -eq "NO")
     {
     Write-Host "################ ######### VM seems to be created from specialised Disk."
     $image = Read-Host 'Enter image name. ( Valid Image names are RHEL,SLES,UBUNTU,CENTOS )'     
-    az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image_urn --storage-sku Standard_LRS --public-ip-address '""'
+    az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image --storage-sku Standard_LRS --public-ip-address '""'
      }
 
    ELSE
