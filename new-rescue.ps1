@@ -508,11 +508,9 @@ echo "###############################################"
 
 write-Host "Copy of OS disk is successfully attached to rescue VM. Please refer CSS wiki page https://www.csssupportwiki.com/index.php/curated:Azure/Virtual_Machine/Features/Disk_Encryption/TSG/General_troubleshooting_for_encrypted_managed_disk#Method_1_2"  and refer Troubleshooting using ADE Dual-Pass --> Method 1 point no 9 which consists of the below commands on rescue VM to mount the OS disk. Once Troubleshooting is done Please refer point no 10 and 11 for for recreating and installing the ADE extension respectively"
 
-
-
 # mkdir /{investigatekey,investigateboot,investigateroot}
 # mount /dev/sdc1 /investigatekey
-# mount -o nouuid /dev/sdd1 /investigateboot/
+# mount -o nouuid /dev/sdd1 /investigateboot
 # cryptsetup luksOpen --key-file /investigatekey/LinuxPassPhraseFileName --header /investigateboot/luks/osluksheader /dev/sdd2 investigateosencrypt
 # mount -o nouuid /dev/mapper/investigateosencrypt /investigateroot/" -ForegroundColor Black -BackgroundColor DarkYellow 
 
@@ -524,8 +522,7 @@ Rescue VM Private IP : $rescuevmprivip
 Username : $rescuevmusername
 Password : $rescuevmpassword" -ForegroundColor DarkGreen
 
-echo $kekurl
-
+$kekurl=echo "$keyencryptionkeyurl" | sed 's/:443//g'
 
 IF ( !$kekurl )
 {
@@ -533,16 +530,16 @@ Write-Host "####################### Dual pass encryption without KEK ###########
 
 Write-Host "####################### Delete the old VM and use the below parameters to recreate the VM after troubleshooting #####################  
 
- rgName=""$rgName""
- location="$location"
- vmName=""$vmName""
- vmSize="$vmSize"
- networkinterface=""$networkinterface""
- manageddiskid=""$manageddiskid""
- diskencryptionkeyvaultid=""$diskencryptionkeyvaultid""
- diskencryptionkeyvaulturl=""$diskencryptionkeyurl""
- keyvaultresourceid=""$diskencryptionkeyvaultid""
- keyencryptionkeyurl=""$kekurl""" -ForegroundColor Black -BackgroundColor DarkYellow
+ $rgName=""$rgName""
+ $location="$location"
+ $vmName=""$vmName""
+ $vmSize="$vmSize"
+ $networkinterface=""$networkinterface""
+ $manageddiskid=""$manageddiskid""
+ $diskencryptionkeyvaultid=""$diskencryptionkeyvaultid""
+ $diskencryptionkeyvaulturl=""$diskencryptionkeyurl""
+ $keyvaultresourceid=""$diskencryptionkeyvaultid""
+ $keyencryptionkeyurl=""$kekurl""" -ForegroundColor Black -BackgroundColor DarkYellow
 
 }
 ELSE
@@ -551,16 +548,22 @@ Write-Host "################ Dual pass encryption with KEK #####################
 
 Write-Host "####################### Delete the old VM and use the below parameters to recreate the VM after troubleshooting #####################
 
- rgName=""$rgName""
- location="$location"
- vmName=""$vmName""
- vmSize="$vmSize"
- networkinterface=""$networkinterface""
- manageddiskid=""$manageddiskid""
- diskencryptionkeyvaultid=""$diskencryptionkeyvaultid""
- diskencryptionkeyvaulturl=""$diskencryptionkeyurl""
- keyvaultresourceid=""$diskencryptionkeyvaultid""
- keyencryptionkeyurl=""$kekurl""" -ForegroundColor Black -BackgroundColor DarkYellow
+ "'$rgName'"=""$rgName""
+ "'$location'"="$location"
+ "'$vmName'"=""$vmName""
+ "'$vmSize'"="$vmSize"
+ "'$networkinterface'"=""$networkinterface""
+ "'$vmc'" = "'New-AzureRmVmConfig -VMName $vmName -VMSize $vmSize'"
+ "'$nic = Get-AzureRmNetworkInterface -Name "$networkinterface" -ResourceGroupName $rgName'"
+ "'Add-AzureRmVmNetworkInterface -VM $vmc -Id $nic.Id'"
+ "'$manageddiskid'"=""$manageddiskid""
+ "'$diskencryptionkeyvaultid'"=""$diskencryptionkeyvaultid""
+ "'$diskencryptionkeyvaulturl'"=""$diskencryptionkeyurl""
+ "'$keyvaultresourceid'"=""$diskencryptionkeyvaultid""
+ "'$keyencryptionkeyurl'"=""$kekurl""
+  Set-AzureRmVmOSDisk -VM "'$vmc'" -ManagedDiskId "'$manageddiskid'"   -DiskEncryptionKeyUrl "'$diskencryptionkeyvaulturl'" -DiskEncryptionKeyVaultId "'$diskencryptionkeyvaultid'" -KeyEncryptionKeyUrl "'$keyencryptionkeyurl'" -KeyEncryptionKeyVaultId "'$keyvaultresourceid'" -Linux -CreateOption Attach
+ New-AzureRmVm -ResourceGroupName "'$rgName'" -Location "'$location'" -VM "'$vmc'"" -ForegroundColor Black -BackgroundColor DarkYellow
+ 
 
 }
 
