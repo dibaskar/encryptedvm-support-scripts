@@ -311,11 +311,19 @@ $Publisher=$(echo $vm_details | jq ".storageProfile.imageReference.publisher")
 $sku=$(echo $vm_details | jq ".storageProfile.imageReference.sku")
 $Version=$(echo $vm_details | jq ".storageProfile.imageReference.version")
 $location=$(echo $vm_details | jq '.location' | tr -d '"')
+
+########## "If source VM is RHEL7.7 rescue VM will be creatd with RHEL 7.4 image to avoid duplication with Volume Groups"
+IF ($sku -eq '"7-LVM"')
+         {
+       $sku="7.4"
+         }
+
 $urn=$publisher,$offer,$sku,$version
 $image_urn=$(echo $urn | xargs | sed 's/ /:/g')
 $os_disk=$(echo $vm_details| jq ".storageProfile.osDisk")
 $disk_uri=$(echo $os_disk | jq ".managedDisk.id")
 $disk_uri=$($disk_uri -replace '"', "")
+$os_type=$(echo $vm_details | jq .storageProfile.osDisk.osType)
 
 Write-Host '################## Generating Snapshot of problematic VM's OS Disk ####################' -ForegroundColor DarkGreen
 $time=date +%d-%m-%Y-%T
@@ -333,15 +341,30 @@ $snapshotId=$(az snapshot show --name $snapshot_name --resource-group $resourceG
 $disk_type=$(az disk list --output table | grep -i $source_disk_name | awk '{print $4}')
 az disk create --resource-group $resourceGroupName --name $target_disk_name -l $location --sku $disk_type --source $snapshotId
 
+
 Write-Host '################### Creating Rescue VM ####################' -ForegroundColor DarkGreen
 
 IF ($rescuevm_require_public_ip -eq "YES")
 {
     IF ($Publisher -eq "null")
     {
+        IF ($os_type -eq '"Windows"')
+         {
+           Write-Host "################ ######### VM seems to be created from specialised Disk."    
+           $image = Read-Host 'Enter image name. ( Valid Image names are Win2019Datacenter, Win2016Datacenter, Win2012R2Datacenter, Win2012Datacenter, Win2008R2SP1 )'
+         }
+
+        ELSE
+         {
     Write-Host "################ ######### VM seems to be created from specialised Disk."
     $image = Read-Host 'Enter image name. ( Valid Image names are RHEL,SLES,UBUNTU,CENTOS )'
-     az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image --storage-sku Standard_LRS
+         IF ($image -eq "RHEL")   
+           {
+           $image_urn="RedHat:RHEL:7.4:latest"
+           }
+
+         }
+     az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image_urn --storage-sku Standard_LRS
      }
 
    ELSE
@@ -356,7 +379,13 @@ IF ($rescuevm_require_public_ip -eq "NO")
     {
     Write-Host "################ ######### VM seems to be created from specialised Disk."
     $image = Read-Host 'Enter image name. ( Valid Image names are RHEL,SLES,UBUNTU,CENTOS )'     
-    az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image --storage-sku Standard_LRS --public-ip-address '""'
+
+     IF ($image -eq "RHEL")
+           {
+           $image_urn="RedHat:RHEL:7.4:latest"
+           }
+
+    az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image_urn --storage-sku Standard_LRS --public-ip-address '""'
      }
 
    ELSE
@@ -436,11 +465,32 @@ echo "scp -pr $path  $rescuevmusername$val$rescuevmip$con$path" >> key.ps1
 
 IF ( !$kekurl )
 {
+  IF ($os_type -eq '"Windows"')
+  {
+   echo $os_type
+    $VolumeType="ALL"
+    Write-Host "####################### Single pass encryption without KEK #####################"  -ForegroundColor DarkGreenSet-AzureRmVMDiskEncryptionExtension -ResourceGroupName $ResourceGroupName -VMName $rescueVMName -DiskEncryptionKeyVaultUrl $diskEncryptionKeyVaultUrl -DiskEncryptionKeyVaultId $KeyVaultResourceId -VolumeType $VolumeType -SequenceVersion $sequenceVersion -skipVmBackup;
+  }
+  ELSE{
+
 Write-Host "####################### Single pass encryption without KEK #####################"  -ForegroundColor DarkGreen
 Set-AzureRmVMDiskEncryptionExtension -ResourceGroupName $ResourceGroupName -VMName $rescueVMName -DiskEncryptionKeyVaultUrl $diskEncryptionKeyVaultUrl -DiskEncryptionKeyVaultId $KeyVaultResourceId -VolumeType $VolumeType -SequenceVersion $sequenceVersion -skipVmBackup;
+     }
 }
 ELSE
 {
+   IF ($os_type -eq '"Windows"')
+  {
+  echo $os_type
+  $VolumeType="ALL" 
+  Write-Host "################ Single pass encryption with KEK #######################" -ForegroundColor DarkGreen
+  $key = Get-AzureKeyVaultKey -VaultName $KeyVaultName -Name $ADEKeyName
+  $keyencryptionkeyurl=$key.Id
+  Set-AzureRmVMDiskEncryptionExtension -ResourceGroupName $ResourceGroupName -VMName $rescueVMName -DiskEncryptionKeyVaultUrl $diskEncryptionKeyVaultUrl -DiskEncryptionKeyVaultId $KeyVaultResourceId -KeyEncryptionKeyUrl $keyencryptionkeyurl -KeyEncryptionKeyVaultId $KeyVaultResourceId -VolumeType $VolumeType -SequenceVersion $sequenceVersion -skipVmBackup;
+  }
+  ELSE
+  {
+
 Write-Host "################ Single pass encryption with KEK #######################" -ForegroundColor DarkGreen
 
 $key = Get-AzureKeyVaultKey -VaultName $KeyVaultName -Name $ADEKeyName
@@ -449,10 +499,22 @@ $keyencryptionkeyurl=$key.Id
 
 # With KEK
 Set-AzureRmVMDiskEncryptionExtension -ResourceGroupName $ResourceGroupName -VMName $rescueVMName -DiskEncryptionKeyVaultUrl $diskEncryptionKeyVaultUrl -DiskEncryptionKeyVaultId $KeyVaultResourceId -KeyEncryptionKeyUrl $keyencryptionkeyurl -KeyEncryptionKeyVaultId $KeyVaultResourceId -VolumeType $VolumeType -SequenceVersion $sequenceVersion -skipVmBackup;
-
+  }
 }
 
-
+IF ($os_type -eq '"Windows"')
+  {
+Write-Host "#################### Copy of OS disk is successfully attached to rescue VM #####################"."
+Write-Host "################ Below are your Rescue VM details #################""
+RescueVM Name : $rescueVMName
+Rescue VM Public IP : $rescuevmpubip
+Rescue VM Private IP : $rescuevmprivip
+Username : $rescuevmusername
+Password : $rescuevmpassword" -ForegroundColor DarkGreen
+exit
+  }
+  ELSE
+  {
 
 Write-Host "#################### Copy of OS disk is successfully attached to rescue VM #####################". Please execute below commands on rescue VM to mount the OS disk. The disk order may change since the VM reboots after enabling extension please validate the disk order in lsblk, if there is a change then please modify /dev/sdc with /dev/sdd"
 #mkdir /{investigateboot,investigateroot}
@@ -470,7 +532,7 @@ Username : $rescuevmusername
 Password : $rescuevmpassword" -ForegroundColor DarkGreen
 
 exit
-
+  }
 }
 
 IF ($Encryption_type -eq "dual")
