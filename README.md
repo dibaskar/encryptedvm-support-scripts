@@ -48,7 +48,7 @@ This version of the VM recovery script is for use with Azure VMs created using t
    ResourceGroupName:  ( Problematic VM's Resource Group Name )
    Encryption_type:  ( This information can be gathered from ASC.Encryption using AAD Credentials is Dual and without AAD Credentials is single )
    rescueVMName:  ( Rescue VM's name )
-   rescuevm_require_public_ip : ( Does rescue VM requires public IP.**`Valid options are yes or no`** )
+   rescuevm_require_public_ip : ( Does rescue VM requires public IP.**`Valid options are yes or no`**. )
    rescuevmusername:  ( Rescue VM's username )
    rescuevmpassword:  ( Rescue VM's Password. Password length should be minimum 12 characters with special characters in it else rescue VM creation will fail )
    ```
