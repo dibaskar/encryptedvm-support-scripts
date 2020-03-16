@@ -42,7 +42,7 @@ This version of the VM recovery script is for use with Azure VMs created using t
    ```
 
 8. Execute the script as mentioned below create a new "rescue VM" and attach the OS disk of the problem VM to the rescue VM as data disk:
-   ```PowerShell
+   ```
    ./new-rescue.ps1
    vmName:   ( Problematic VM's Name )
    ResourceGroupName:  ( Problematic VM's Resource Group Name )
