@@ -70,4 +70,4 @@ This version of the VM recovery script is for use with Azure VMs created using t
 
 9. Commands for mounting the disk on rescue VM will be printed once script execution is done. SSH to the rescue VM for mounting the attached encrypted OS disk and proceed with further troubleshooting **`Please note : There will be slight change in these mount commands based on the OS distro`**.
 
-     **a) If encryption type is dual, Commands for mounting the disk on rescue VM will be printed once script execution is done and the commands for creation on new VM will also be printed as swap disk option is not available for dual pass VMs. ** 
+     **`a) If encryption type is dual, Commands for mounting the disk on rescue VM will be printed once script execution is done and the commands for creation on new VM will also be printed as swap disk option is not available for dual pass VMs. `** 
