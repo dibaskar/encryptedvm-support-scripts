@@ -357,40 +357,55 @@ IF ($rescuevm_require_public_ip -eq "YES")
         ELSE
          {
     Write-Host "################ ######### VM seems to be created from specialised Disk."
-    $image = Read-Host 'Enter image name. ( Valid Image names are RHEL,SLES,UBUNTU,CENTOS )'
+    $image = Read-Host 'Enter image name. ( Valid Image names are RHEL,SLES,UBUNTULTS,CENTOS )'
          IF ($image -eq "RHEL")   
            {
            $image_urn="RedHat:RHEL:7.4:latest"
+     az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image_urn --storage-sku Standard_LRS
            }
 
+         ELSE
+         {
+   az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image --storage-sku Standard_LRS
          }
-     az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image_urn --storage-sku Standard_LRS
-     }
-
-   ELSE
-   {
-   az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image_urn --storage-sku Standard_LRS
-   }
+  }
+ }
+        ELSE
+        {
+        az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image_urn --storage-sku Standard_LRS
+        }
 }
 
 IF ($rescuevm_require_public_ip -eq "NO")
 {
    IF ($Publisher -eq "null")
     {
+      IF ($os_type -eq '"Windows"')
+         {
+           Write-Host "################ ######### VM seems to be created from specialised Disk."           
+           $image = Read-Host 'Enter image name. ( Valid Image names are Win2019Datacenter, Win2016Datacenter, Win2012R2Datacenter, Win2012Datacenter, Win2008R2SP1 )'
+         }
+
+     ELSE
+     {
     Write-Host "################ ######### VM seems to be created from specialised Disk."
-    $image = Read-Host 'Enter image name. ( Valid Image names are RHEL,SLES,UBUNTU,CENTOS )'     
+    $image = Read-Host 'Enter image name. ( Valid Image names are RHEL,SLES,UBUNTULTS,CENTOS )'     
 
      IF ($image -eq "RHEL")
            {
            $image_urn="RedHat:RHEL:7.4:latest"
-           }
-
     az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image_urn --storage-sku Standard_LRS --public-ip-address '""'
-     }
+           }
 
    ELSE
    {
-   az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image $image_urn --storage-sku Standard_LRS --public-ip-address '""'
+   az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image "$image" --storage-sku Standard_LRS --public-ip-address '""'
+   }
+  }
+ }
+   ELSE
+   {
+   az vm create --name  $rescueVMName -g $resourceGroupName --location $location --admin-username $rescuevmusername --admin-password $rescuevmpassword --image "$image_urn" --storage-sku Standard_LRS --public-ip-address '""'
    }
 }
 
