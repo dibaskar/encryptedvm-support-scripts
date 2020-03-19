@@ -517,6 +517,7 @@ Set-AzureRmVMDiskEncryptionExtension -ResourceGroupName $ResourceGroupName -VMNa
   }
 }
 
+
 IF ($os_type -eq '"Windows"')
   {
 Write-Host "#################### Copy of OS disk is successfully attached to rescue VM #####################"."
@@ -525,12 +526,11 @@ RescueVM Name : $rescueVMName
 Rescue VM Public IP : $rescuevmpubip
 Rescue VM Private IP : $rescuevmprivip
 Username : $rescuevmusername
-Password : $rescuevmpassword" -ForegroundColor DarkGreen
+Password : $rescuevmpassword"" -ForegroundColor DarkGreen
 exit
   }
   ELSE
   {
-
 Write-Host "#################### Copy of OS disk is successfully attached to rescue VM #####################". Please execute below commands on rescue VM to mount the OS disk. The disk order may change since the VM reboots after enabling extension please validate the disk order in lsblk, if there is a change then please modify /dev/sdc with /dev/sdd"
 #mkdir /{investigateboot,investigateroot}
 #mount -o nouuid  /dev/sdc1 /investigateboot
