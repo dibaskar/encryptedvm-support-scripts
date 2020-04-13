@@ -428,7 +428,7 @@ $networkinterface=$($interface -replace '"', "")
 $nic = Get-AzureRmNetworkInterface -Name "$networkinterface" -ResourceGroupName $rgName
 Add-AzureRmVmNetworkInterface -VM $vmc -Id $nic.Id
 $manageddiskid = Get-AzureRMDisk -ResourceGroupName $ResourceGroupName -DiskName $target_disk_name | grep -i Id | grep -i disks | awk -F": " '{print $2}'
-$KeyVaultName=echo $keyvaulturl | awk -F".vault.azure.net" '{print $1}' | awk -F"//" '{print $2}'
+$KeyVaultName=echo $keyvaulturl | awk -F".vault.azure.net" '{print $1}' | awk -F"//" '{print $2}' | uniq
 $diskencryptionkeyvaultid= Get-AzureRmKeyVault -VaultName $KeyVaultName | grep -i "Resource ID" | awk -F": " '{print $2}'
 $diskencryptionkeyurl = $keyvaulturl
 $keyvaultresourceid=$diskencryptionkeyvaultid
@@ -442,7 +442,7 @@ $KeyVault = Get-AzureRmKeyVault -VaultName $KeyVaultName -ResourceGroupName $rgK
 $diskEncryptionKeyVaultUrl = $KeyVault.VaultUri;
 $KeyVaultResourceId = $KeyVault.ResourceId;
 
-$ADEKeyName=echo $kekurl | awk -F "/" '{print $5}'
+$ADEKeyName=echo $kekurl | awk -F "/" '{print $5}' | uniq
 $VolumeType = 'Data';
 
 
@@ -498,6 +498,7 @@ ELSE
   {
   echo $os_type
   $VolumeType="ALL" 
+  echo $VolumeType
   Write-Host "################ Single pass encryption with KEK #######################" -ForegroundColor DarkGreen
   $key = Get-AzureKeyVaultKey -VaultName $KeyVaultName -Name $ADEKeyName
   $keyencryptionkeyurl=$key.Id
